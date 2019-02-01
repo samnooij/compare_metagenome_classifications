@@ -1,0 +1,9 @@
+name: CAT
+channels:
+- bioconda
+- conda-forge
+- defaults
+dependencies:
+- cat=4.3.3
+- diamond=0.9.14
+

@@ -1,0 +1,249 @@
+"""
+    classification_comparison
+    Copyright (C) 2019  Sam Nooij
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    
+Snakemake pipeline that takes assembled contigs as input and classifies
+them using CAT. These classifications are compared to the original
+pipeline output (Megablast to the BLAST nt database, with Krona's LCA
+algorithm, as of 2019-02-01).
+Comparisons are visualised as stacked bar charts, a Venn diagramme 
+and a number of tables.
+"""
+
+#Set global variables:
+SOURCE_DIR = config["source_dir"]
+WORK_DIR = config["work_dir"]
+DB_DIR = config["db_dir"]
+SAMPLES = config["samples"]
+
+#[ "SRR7892437", "SRR7892440", "SRR7892443", 
+#           "SRR7892448", "SRR7892449", "SRR7892450", 
+#           "SRR7892453", "SRR7892459", "SRR7892464", 
+#           "SRR7892465" ]
+
+rule all:
+    input:
+        expand( "{sample}.CAT.Krona.html", sample = SAMPLES),
+        expand( "{sample}.PZN-CAT.venn.png", sample = SAMPLES),
+        "OVERALL.PZN-CAT.venn.png",
+        "OVERALL.PZN-CAT.composition_graph.html"
+        
+localrules: grep_PZN_contig_classifications, grep_PZN_unclassified_contig_annotations,
+    merge_CAT_PZN_annotations, CAT_visualise_Krona, per_sample_PZN_CAT_comparison, 
+    overall_PZN_CAT_comparison, draw_PZN_CAT_superkingdom_bars
+        
+rule predict_orfs:
+    input:
+        SOURCE_DIR + "/data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta"
+    output:
+        fasta=WORK_DIR + "/tmp/{sample}.CAT.predicted_proteins.faa",
+        gff=WORK_DIR + "/tmp/{sample}.CAT.predicted_proteins.gff"
+    threads: config["threads"]["predict_orfs"]
+    conda:
+        "envs/CAT.yaml"
+    params:
+        mode=config["prodigal"]["mode"],
+        translation_table=config["prodigal"]["translation_table"],
+        format=config["prodigal"]["format"]        
+    shell:
+        """
+        if [ "{config[prodigal][quiet]" != "0" ]; then
+            prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format} -q
+        else
+            prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format}
+        fi
+        """
+
+rule run_diamond_blastp:
+    input:
+        contigs=SOURCE_DIR + "/data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta" ,
+        pred_prot=WORK_DIR + "/tmp/{sample}.CAT.predicted_proteins.faa",
+        db=DB_DIR + "/CAT_prepare_20181212/2018-12-12_CAT_database/2018-12-12.nr.dmnd"
+    output:
+        WORK_DIR + "/tmp/{sample}.CAT.alignment.diamond"
+    threads: config["threads"]["run_diamond_blastp"]
+    conda:
+        "envs/CAT.yaml"
+    params:
+        top=config["diamond"]["top"],
+        matrix=config["diamond"]["matrix"],
+        evalue=config["diamond"]["evalue"],
+    shell:
+        """
+        if [ "{config[diamond][sensitive]" != "0" ]; then
+            if [ "{config[diamond][quiet] != "0" ]; then
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive --quiet
+            else
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive
+            fi
+        else
+            if [ "{config[diamond][quiet] != "0" ]; then
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --quiet
+            else
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads}
+            fi
+        fi
+        """
+
+rule CAT_classify_contigs:
+    input:
+        fasta=SOURCE_DIR + "/data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta",
+        db=DB_DIR + "/CAT_prepare_20181212/2018-12-12_CAT_database/",
+        tax=DB_DIR + "/CAT_prepare_20181212/2018-12-12_taxonomy/",
+        pred_prot=WORK_DIR + "/tmp/{sample}.CAT.predicted_proteins.faa",
+        diamond=WORK_DIR + "/tmp/{sample}.CAT.alignment.diamond"
+    output:
+        clas=WORK_DIR + "/results/CAT/{sample}.CAT.contig2classification.txt",
+        log=WORK_DIR + "/log/{sample}.CAT.log",
+        orf2lca=WORK_DIR + "/results/CAT/{sample}.CAT.ORF2LCA.txt"
+    threads: config["threads"]["CAT_classify_contigs"]
+    conda:
+        "envs/CAT.yaml"
+    shell:
+        """
+        CAT contigs -c {input.fasta} -d {input.db} -t {input.tax} \
+        -p {input.pred_prot} -a {input.diamond} -o {wildcards.sample}.CAT
+        """
+        
+rule CAT_add_names:
+    input:
+        clas=WORK_DIR + "/results/CAT/{sample}.CAT.contig2classification.txt",
+        tax=DB_DIR + "/CAT_prepare_20181212/2018-12-12_taxonomy/"
+    output:
+        WORK_DIR + "/results/CAT/{sample}.CAT.add_names.txt"
+    threads: config["threads"]["CAT_classify_contigs"]
+    conda:
+        "envs/CAT.yaml"
+    shell:
+        "CAT add_names --only_official -i {input.clas} -o {output} -t {input.tax}"
+        
+rule CAT_summarise:
+    input:
+        fasta=SOURCE_DIR + "/data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta",
+        names=WORK_DIR + "/results/CAT/{sample}.CAT.add_names.txt"
+    output:
+        WORK_DIR + "/results/CAT/{sample}.CAT.summary"
+    threads: config["threads"]["CAT_summarise"]
+    conda:
+        "envs/CAT.yaml"
+    shell:
+        "CAT summarise -c {input.fasta} -i {input.names} -o {output}"
+
+rule grep_PZN_contig_classifications:
+    input:
+        SOURCE_DIR + "/results/all_taxClassified.tsv"
+    output:
+        WORK_DIR + "/tmp/{sample}.PZN.classified.tsv"
+    threads: config["threads"]["grep_PZN_contig_classifications"]
+    shell:
+        """
+        head -1 {input} | cut -f 1-23 > {output} && \
+        grep \"{wildcards.sample}\" {input} | cut -f 1-23 >> {output}
+        """
+    #insert cut commands to discard sequences and make it easier to read the files
+        
+rule grep_PZN_unclassified_contig_annotations:
+    input:
+        SOURCE_DIR + "/results/all_taxUnclassified.tsv"
+    output:
+        WORK_DIR + "/tmp/{sample}.PZN.unclassified.tsv"
+    threads: config["threads"]["grep_PZN_unclassified_contig_annotations"]
+    shell:
+        """
+        head -1 {input} | cut -f 1-12 > {output} && \
+        grep \"{wildcards.sample}\" {input} | cut -f 1-12 >> {output}
+        """
+    #insert cut commands to discard sequences and make it easier to read the files
+        
+rule merge_CAT_PZN_annotations:
+    input:
+        names=WORK_DIR + "/results/CAT/{sample}.CAT.add_names.txt",
+        pzn_clas = WORK_DIR + "/tmp/{sample}.PZN.classified.tsv",
+        pzn_unclas = WORK_DIR + "/tmp/{sample}.PZN.unclassified.tsv"
+    output:
+        WORK_DIR + "/tmp/{sample}.CAT.Krona.info.tsv"
+    conda:
+        "envs/dataframe_visualisation.yaml"
+    threads: config["threads"]["merge_CAT_PZN_annotations"]
+    script:
+        WORK_DIR + "/bin/merge_contig_annotations.py"
+        
+rule CAT_visualise_Krona:
+    input:
+        WORK_DIR + "/tmp/{sample}.CAT.Krona.info.tsv"
+    output:
+        minimal=WORK_DIR + "/tmp/{sample}.CAT.Krona.info-minimal.tsv",
+        krona=WORK_DIR + "/results/figures/{sample}.CAT.Krona.html" 
+    conda:
+        "envs/Krona.yaml"
+    threads: config["threads"]["CAT_visualise_Krona"]
+    shell:
+        """
+        cut -f 2,3-10 {input} > {output.minimal} && \
+        ktImportText {output.minimal} -o {output.krona}
+        """
+        
+rule per_sample_PZN_CAT_comparison:
+    input:
+        pzn=[ WORK_DIR + "/tmp/{sample}.PZN.classified.tsv", 
+             WORK_DIR + "/tmp/{sample}.PZN.unclassified.tsv" ],
+        cat=WORK_DIR + "/tmp/{sample}.CAT.Krona.info.tsv"
+    output:
+        table_nr=WORK_DIR + "/results/tables/{sample}.PZN-CAT.concordant_taxa.tsv",
+        table_pc=WORK_DIR + "/results/tables/{sample}.PZN-CAT.concordant_taxa-percentages.tsv",
+        figure_nr=WORK_DIR + "/results/figures/{sample}.PZN-CAT.concordant_taxa.html",
+        venn=WORK_DIR + "/results/figures/{sample}.PZN-CAT.venn.png"
+    #sub-optimal solution to create multiple output files:
+    params:
+        list_prefix=WORK_DIR + "/results/tables/{sample}.PZN-CAT.comparison." #to be complemented with e.g. "species.tsv"
+    conda:
+        "envs/dataframe_visualisation.yaml"
+    threads: config["threads"]["per_sample_PZN_CAT_comparison"]
+    script:
+        WOKR_DIR + "/bin/classification_concordances.py"
+        
+rule overall_PZN_CAT_comparison:
+    input:
+        pzn=expand(WORK_DIR + "/tmp/{sample}.PZN.{status}.tsv", sample = SAMPLES, status = [ "classified", "unclassified" ]),
+        cat=expand(WORK_DIR + "/tmp/{sample}.CAT.Krona.info.tsv", sample = SAMPLES)
+    output:
+        table_nr=WORK_DIR + "/results/tables/OVERALL.PZN-CAT.concordant_taxa.tsv",
+        table_pc=WORK_DIR + "/results/tables/OVERALL.PZN-CAT.concordant_taxa-percentages.tsv",
+        figure_nr=WORK_DIR + "/results/figures/OVERALL.PZN-CAT.concordant_taxa.html",
+        venn=WORK_DIR + "/results/figures/OVERALL.PZN-CAT.venn.png",
+    #sub-optimal solution to create multiple output files:
+    params:
+        list_prefix=WORK_DIR + "/results/tables/OVERALL.PZN-CAT.comparison." #to be complemented with e.g. "species.tsv"
+    conda:
+        "envs/dataframe_visualisation.yaml"
+    threads: config["threads"]["overall_PZN_CAT_comparison"]
+    script:
+        WORK_DIR + "/bin/classification_concordances.py"
+
+rule draw_PZN_CAT_superkingdom_bars:
+    input:
+        pzn=SOURCE_DIR + "/results/profile_read_counts.csv",
+        cat=expand(WORK_DIR + "/tmp/{sample}.CAT.Krona.info-minimal.tsv", sample = SAMPLES)
+    output:
+        WORK_DIR + "/results/figures/OVERALL.PZN-CAT.composition_graph.html"
+    params:
+        samples=expand("{sample}", sample = SAMPLES)
+    conda:
+        "envs/dataframe_visualisation.yaml"
+    threads: config["threads"]["draw_PZN_CAT_superkingdom_bars"]
+    script:
+        WORK_DIR + "/bin/draw_pzn_cat_bars.py"
