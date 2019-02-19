@@ -55,6 +55,10 @@ rule predict_orfs:
     threads: config["threads"]["predict_orfs"]
     conda:
         "envs/CAT.yaml"
+    log:
+        "log/predict_orfs.{sample}.txt"
+    benchmark:
+        "log/benchmark/predict_orfs.{sample}.txt"
     params:
         mode=config["prodigal"]["mode"],
         translation_table=config["prodigal"]["translation_table"],
@@ -62,9 +66,9 @@ rule predict_orfs:
     shell:
         """
         if [ "{config[prodigal][quiet]" != "0" ]; then
-            prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format} -q
+            prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format} -q > {log} 2>&1
         else
-            prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format}
+            prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format} > {log} 2>&1
         fi
         """
 
@@ -78,6 +82,10 @@ rule run_diamond_blastp:
     threads: config["threads"]["run_diamond_blastp"]
     conda:
         "envs/CAT.yaml"
+    log:
+        "log/run_diamond_blastp.{sample}.txt"
+    benchmark:
+        repeat("log/benchmark/run_diamond_blasp.{sample}.txt", 1) #change the number depending on how many times you want to time Diamond
     params:
         top=config["diamond"]["top"],
         matrix=config["diamond"]["matrix"],
@@ -86,15 +94,15 @@ rule run_diamond_blastp:
         """
         if [ "{config[diamond][sensitive]" != "0" ]; then
             if [ "{config[diamond][quiet] != "0" ]; then
-                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive --quiet
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive --quiet > {log} 2>&1
             else
-                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive > {log} 2>&1
             fi
         else
             if [ "{config[diamond][quiet] != "0" ]; then
-                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --quiet
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --quiet > {log} 2>&1
             else
-                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads}
+                diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} > {log} 2>&1
             fi
         fi
         """
@@ -113,11 +121,16 @@ rule CAT_classify_contigs:
     threads: config["threads"]["CAT_classify_contigs"]
     conda:
         "envs/CAT.yaml"
+    log:
+        "{sample}.CAT.log"
+    benchmark:
+        "log/benchmark/CAT_classify_contigs.{sample}.txt"
     shell:
         """
         CAT contigs -c {input.fasta} -d {input.db} -t {input.tax} \
         -p {input.pred_prot} -a {input.diamond} -o {wildcards.sample}.CAT
         """
+        # left out the "> {log} 2>&1 because CAT makes its own log
         
 rule CAT_add_names:
     input:
@@ -128,8 +141,12 @@ rule CAT_add_names:
     threads: config["threads"]["CAT_classify_contigs"]
     conda:
         "envs/CAT.yaml"
+    log:
+        "log/CAT_add_names.{sample}.txt"
+    benchmark:
+        "log/benchmark/CAT_add_names.{sample}.txt"
     shell:
-        "CAT add_names --only_official -i {input.clas} -o {output} -t {input.tax}"
+        "CAT add_names --only_official -i {input.clas} -o {output} -t {input.tax} > {log} 2>&1"
         
 rule CAT_summarise:
     input:
@@ -140,8 +157,12 @@ rule CAT_summarise:
     threads: config["threads"]["CAT_summarise"]
     conda:
         "envs/CAT.yaml"
+    log:
+        "log/CAT_summarise.{sample}.txt"
+    benchmark:
+        "log/benchmark/CAT_summarise.{sample}.txt"
     shell:
-        "CAT summarise -c {input.fasta} -i {input.names} -o {output}"
+        "CAT summarise -c {input.fasta} -i {input.names} -o {output} > {log} 2>&1"
 
 rule grep_PZN_contig_classifications:
     input:
@@ -149,12 +170,18 @@ rule grep_PZN_contig_classifications:
     output:
         WORK_DIR + "/tmp/{sample}.PZN.classified.tsv"
     threads: config["threads"]["grep_PZN_contig_classifications"]
+    log:
+        "log/grep_PZN_contig_classifications.{sample}.txt"
+    benchmark:
+        "log/benchmark/grep_PZN_contig_classifications.{sample}.txt"
     shell:
         """
         head -1 {input} | cut -f 1-23 > {output} && \
-        grep \"{wildcards.sample}\" {input} | cut -f 1-23 >> {output}
+        grep \"{wildcards.sample}\" {input} | cut -f 1-23 >> {output} \
+        2> {log}
         """
     #insert cut commands to discard sequences and make it easier to read the files
+    #only redirect stderr to log file, or the output file will be empty
         
 rule grep_PZN_unclassified_contig_annotations:
     input:
@@ -162,12 +189,18 @@ rule grep_PZN_unclassified_contig_annotations:
     output:
         WORK_DIR + "/tmp/{sample}.PZN.unclassified.tsv"
     threads: config["threads"]["grep_PZN_unclassified_contig_annotations"]
+    log:
+        "log/grep_PZN_unclassified_contig_annotations.{sample}.txt"
+    benchmark:
+        "log/benchmark/grep_PZN_unclassified_contig_annotations.{sample}.txt"
     shell:
         """
         head -1 {input} | cut -f 1-12 > {output} && \
-        grep \"{wildcards.sample}\" {input} | cut -f 1-12 >> {output}
+        grep \"{wildcards.sample}\" {input} | cut -f 1-12 >> {output} \
+        2> {log}
         """
     #insert cut commands to discard sequences and make it easier to read the files
+    #only redirect stderr to log file, or the output file will be empty
         
 rule merge_CAT_PZN_annotations:
     input:
@@ -178,6 +211,10 @@ rule merge_CAT_PZN_annotations:
         WORK_DIR + "/tmp/{sample}.CAT.Krona.info.tsv"
     conda:
         "envs/dataframe_visualisation.yaml"
+        log:
+        "log/merge_CAT_PZN_annotations.{sample}.txt"
+    benchmark:
+        "log/benchmark/merge_CAT_PZN_annotations.{sample}.txt"
     threads: config["threads"]["merge_CAT_PZN_annotations"]
     script:
         WORK_DIR + "/bin/merge_contig_annotations.py"
@@ -191,10 +228,15 @@ rule CAT_visualise_Krona:
     conda:
         "envs/Krona.yaml"
     threads: config["threads"]["CAT_visualise_Krona"]
+    log:
+        "log/CAT_visualise_Krona.{sample}.txt"
+    benchmark:
+        "log/benchmark/CAT_visualise_krona.{sample}.txt"
     shell:
         """
         cut -f 2,3-10 {input} > {output.minimal} && \
-        ktImportText {output.minimal} -o {output.krona}
+        ktImportText {output.minimal} -o {output.krona} \
+        > {log} 2>&1
         """
         
 rule per_sample_PZN_CAT_comparison:
@@ -213,6 +255,10 @@ rule per_sample_PZN_CAT_comparison:
     conda:
         "envs/dataframe_visualisation.yaml"
     threads: config["threads"]["per_sample_PZN_CAT_comparison"]
+    log:
+        "log/per_sample_PZN_CAT_comparison.{sample}.txt"
+    benchmark:
+        "log/benchmark/per_sample_PZN_CAT_comparison.{sample}.txt"
     script:
         WOKR_DIR + "/bin/classification_concordances.py"
         
@@ -231,6 +277,10 @@ rule overall_PZN_CAT_comparison:
     conda:
         "envs/dataframe_visualisation.yaml"
     threads: config["threads"]["overall_PZN_CAT_comparison"]
+    log:
+        "log/overall_PZN_CAT_comparison.txt"
+    benchmark:
+        "log/benchmark/overall_PZN_CAT_comparison.txt
     script:
         WORK_DIR + "/bin/classification_concordances.py"
 
@@ -245,5 +295,9 @@ rule draw_PZN_CAT_superkingdom_bars:
     conda:
         "envs/dataframe_visualisation.yaml"
     threads: config["threads"]["draw_PZN_CAT_superkingdom_bars"]
+    log:
+        "log/draw_PZN_CAT_superkingdom_bars.txt"
+    benchmark:
+        "log/benchmark/draw_PZN_CAT_superkingdom_bars.txt"
     script:
         WORK_DIR + "/bin/draw_pzn_cat_bars.py"
