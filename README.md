@@ -32,34 +32,35 @@ system.
 ## User manual
 
 _N.B. The manual will use conda for installing software. Other options exist,_
-_but have not been tested._
+_but have not been tested._  
 _Also, this tool assumes you have already run the Jovian metagenomics pipeline_
 _and have its results ready._
 
 ### 1. Initial setup
 
-Install conda, following the instructions from 
+1. **Install conda**, following the instructions from 
 https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation
 
-Install Snakemake, for instance using a conda environment:  
+2. **Install Snakemake**, for instance using a conda environment:  
 `conda create -n snakemake snakemake=5.3.0 -c bioconda -c conda-forge`  
 (version number may be omitted to install the latest available version)
 
-Get the project code from GitHub:  
+3. **Get the project code** from GitHub:  
 `git clone [link to project]`
+
 
 ### 2. Set the parameters to match your setup
 
-_Optional: if not working on the same HPC cluster:_  
-Edit the lines starting with "drmaa" and "jobname" in `conf/config.yaml` using 
+_Optional: if **not working on the same HPC** cluster:_  
+ - Edit the lines starting with "drmaa" and "jobname" in `conf/config.yaml` using 
 a text editor. (Adjust to your own system, or remove the lines.  
 Also, if you have more or fewer than 12 CPU cores on your machine, you can edit
 the line "run_diamond_blastp: 12" under "threads:" accordingly.
 
-_Optional: if you want to experiment with Prodigal/Diamond parameters:_
-Edit the "Custom parameters" part (bottom) of `conf/parameters.yaml`.
+_Optional: if you want to **experiment with Prodigal/Diamond parameters**:_
+ - Edit the "Custom parameters" part (bottom) of `conf/parameters.yaml`.
 
-Edit `conf/parameters.yaml` to point to the necessary files:
+1. **Edit** `conf/parameters.yaml` to point to the necessary files:
  - `source_dir` points to the Jovian folder
  - `work_dir` points to the folder where CAT's results and the comparison
  results will be stored 
@@ -71,17 +72,19 @@ Edit `conf/parameters.yaml` to point to the necessary files:
  want to analyse with CAT and compare to Jovian's Megablast (e.g. if you started
  with fastq files like `SRR7892426_R1.fastq` and `SRR7892426_R1.fastq`, then
  the sample name is "SRR7892426")
- 
+
+
 ### 3. Run CAT and compare the results
 
-(If using Snakemake from a conda environment, activate it.)  
+1. (If using Snakemake from a **conda environment, activate it**.)  
 `source activate snakemake`
 
-Run snakemake:  
+2. **Run snakemake**:  
 `snakemake --profile conf`
 
-Wait until the analysis is finished and then browse the results in the
-`results/` folder. Figures can be found in `results/figures/` and can be viewed
+3. **Wait** until the analysis is finished and then **browse the results** in 
+the `results/` folder.  
+Figures can be found in `results/figures/` and can be viewed
 directly in a webbrowser. Tables in are in `results/tables/` and can for example
 be used in small tests. E.g. the question "which virus species were identified
 by both methods?" can be tested with 
