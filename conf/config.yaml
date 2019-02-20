@@ -1,0 +1,10 @@
+#Config file optimised for BioGrid cluster at RIVM
+printshellcmds: true
+cores: 100
+latency-wait: 60
+local-cores: 8
+use-conda: true
+drmaa: " -q bio -n {threads} -R \"span[hosts=1]\""
+drmaa-log-dir: log/drmaa
+jobname: {name}.jobid{jobid}
+configfile: conf/parameters.yaml

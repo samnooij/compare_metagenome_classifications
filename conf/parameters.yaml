@@ -1,0 +1,49 @@
+#The directory in which previously generated metagenomics pipeline results are:
+source_dir: "/path/to/generated/output/"
+
+#The directory in which this Snakemake pipeline is to work (usually that is the current directory; an empty path or dot (for a relative path) should suffice):
+work_dir: "/path/to/new/dir/"
+
+#The directory in which the databases for CAT (DIAMOND) have been stored:
+db_dir: "/path/to/db/"
+
+#The names of the samples to use in the experiment (a subset of those analysed with the metagenomics pipeline):
+samples:
+  "sample1",
+  "sample2",
+  "sample3",
+  "sample4"
+  
+#Number of threads to be used by different rules:
+threads:
+  predict_orfs: 1
+  run_diamond_blastp: 12 #at the moment this is the only step that benefits from using multiple processors
+  CAT_classify_contigs: 1
+  CAT_add_names: 1
+  CAT_summarise: 1
+  grep_PZN_contig_classifications: 1
+  grep_PZN_unclassified_contig_annotations: 1
+  merge_CAT_PZN_annotations: 1
+  CAT_visualise_Krona: 1
+  per_sample_PZN_CAT_comparison: 1
+  overall_PZN_CAT_comparison: 1
+  PZN_CAT_superkingdom_bars: 1
+  
+#Custom parameters:
+prodigal:
+  mode: meta #for metagenomics, default is single
+  translation_table: 11 #default: 11
+  quiet: 1 #suppress stderr output (1 = True, 0 = False)
+  format: gff #output file format, requires gff for CAT, default is gbk (third option is sco)
+#default shell command in snakemake:        "prodigal -i {input} -a {output.fasta} -o {output.gff} -p meta -g 11 -q -f gff"
+
+diamond:
+  top: 50 #"report alignments within this percentage range of top alignment score (overrides --max-target-seqs)"
+  matrix: BLOSUM62 #the matrix to use for scoring the protein alignment, default: BLOSUM62
+  evalue: 0.001 #maximum e-value to report alignments, default: 0.001
+  quiet: 1 #disable output to the terminal (1 = True, 0 = False)
+  sensitive: 0 #enable sensitive mode, default: fast  (1 = True, 0 = False)
+#default shell command in snakemake: """
+#        diamond blastp -d {input.db} -q {input.pred_prot} --top 50 \
+#        --matrix BLOSUM62 --evalue 0.001 -o {output} -p {threads} --quiet
+#        """
