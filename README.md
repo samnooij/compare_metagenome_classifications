@@ -92,3 +92,9 @@ by both methods?" can be tested with
 (Such questions can be taylored to specific samples by changing "OVERALL" into
 the sample name, to taxonomic ranks by changing "species" to the desired rank,
 and to taxonomic names by changing "virus" to the desired name.)
+
+-----
+
+## Licence
+
+This project is licensed under the terms of the [GNU GPLv2 licence](LICENSE).
