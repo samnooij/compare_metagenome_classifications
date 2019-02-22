@@ -65,7 +65,7 @@ rule predict_orfs:
         format = config["prodigal"]["format"]        
     shell:
         """
-        if [ "{config[prodigal][quiet]" != "0" ]; then
+        if [ "{config[prodigal][quiet]}" != "0" ]; then
             prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format} -q > {log} 2>&1
         else
             prodigal -i {input} -a {output.fasta} -o {output.gff} -p {params.mode} -g {params.translation_table} -f {params.format} > {log} 2>&1
@@ -92,14 +92,14 @@ rule run_diamond_blastp:
         evalue = config["diamond"]["evalue"],
     shell:
         """
-        if [ "{config[diamond][sensitive]" != "0" ]; then
-            if [ "{config[diamond][quiet] != "0" ]; then
+        if [ "{config[diamond][sensitive]}" != "0" ]; then
+            if [ "{config[diamond][quiet]}" != "0" ]; then
                 diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive --quiet > {log} 2>&1
             else
                 diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --sensitive > {log} 2>&1
             fi
         else
-            if [ "{config[diamond][quiet] != "0" ]; then
+            if [ "{config[diamond][quiet]}" != "0" ]; then
                 diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} --quiet > {log} 2>&1
             else
                 diamond blastp -d {input.db} -q {input.pred_prot} --top {params.top} --matrix {params.matrix} -e {params.evalue} -o {output} -p {threads} > {log} 2>&1
