@@ -82,7 +82,7 @@ _Optional: if you want to **experiment with Prodigal/Diamond parameters**:_
 1. (If using Snakemake from a **conda environment, activate it**.)  
 `source activate snakemake`
 
-2. Do a snakemake-**dry run** to test if the configuration files are correct:
+2. Do a snakemake-**dry run** to test if the configuration files are correct:  
 `snakemake --snakefile Compare_CAT.sm --profile conf -n`
 
 3. **Run snakemake**:  
@@ -95,9 +95,14 @@ directly in a webbrowser. Tables in are in `results/tables/` and can for example
 be used in small tests. E.g. the question "which virus species were identified
 by both methods?" can be tested with 
 `cut -f 1 results/tables/OVERALL.PZN-CAT.comparison.species.tsv | grep "virus"`.
-(Such questions can be taylored to specific samples by changing "OVERALL" into
-the sample name, to taxonomic ranks by changing "species" to the desired rank,
-and to taxonomic names by changing "virus" to the desired name.)
+(Such questions can be taylored to specific samples by changing the 1
+(for "classified by both") to 2 (for "clasified only by Jovian") or 3 (for
+"classified only by CAT"), "OVERALL" into the sample name, 
+taxonomic ranks by changing "species" to the desired rank,
+and to taxonomic names by changing "virus" to the desired name. E.g.
+`cut -f 3 results/tables/sample1.PZN-CAT.comparison.*.tsv | grep "bacter"` finds
+all contigs in "sample1" that were only classified by CAT and have "bacter" in
+_any_ taxonomic rank (this should catch most bacteria and bacteriophages).)
 
 -----
 
