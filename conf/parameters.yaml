@@ -9,10 +9,9 @@ db_dir: "/path/to/db/"
 
 #The names of the samples to use in the experiment (a subset of those analysed with the metagenomics pipeline):
 samples:
-  "sample1",
-  "sample2",
-  "sample3",
-  "sample4"
+  - sample1
+  - sample2
+  - sample3
   
 #Number of threads to be used by different rules:
 threads:
