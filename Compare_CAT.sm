@@ -217,7 +217,7 @@ rule merge_CAT_PZN_annotations:
         "log/benchmark/merge_CAT_PZN_annotations.{sample}.txt"
     threads: config["threads"]["merge_CAT_PZN_annotations"]
     script:
-        WORK_DIR + "/bin/merge_contig_annotations.py"
+        "bin/merge_contig_annotations.py"
         
 rule CAT_visualise_Krona:
     input:
@@ -260,7 +260,7 @@ rule per_sample_PZN_CAT_comparison:
     benchmark:
         "log/benchmark/per_sample_PZN_CAT_comparison.{sample}.txt"
     script:
-        WOKR_DIR + "bin/classification_concordances.py"
+        "bin/classification_concordances.py"
         
 rule overall_PZN_CAT_comparison:
     input:
@@ -282,7 +282,7 @@ rule overall_PZN_CAT_comparison:
     benchmark:
         "log/benchmark/overall_PZN_CAT_comparison.txt
     script:
-        WORK_DIR + "bin/classification_concordances.py"
+        "bin/classification_concordances.py"
 
 rule draw_PZN_CAT_superkingdom_bars:
     input:
@@ -300,4 +300,4 @@ rule draw_PZN_CAT_superkingdom_bars:
     benchmark:
         "log/benchmark/draw_PZN_CAT_superkingdom_bars.txt"
     script:
-        WORK_DIR + "bin/draw_pzn_cat_bars.py"
+        "bin/draw_pzn_cat_bars.py"
