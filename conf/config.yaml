@@ -6,5 +6,5 @@ local-cores: 8
 use-conda: true
 drmaa: " -q bio -n {threads} -R \"span[hosts=1]\""
 drmaa-log-dir: log/drmaa
-jobname: {name}.jobid{jobid}
+jobname: "{name}.jobid{jobid}"
 configfile: conf/parameters.yaml
