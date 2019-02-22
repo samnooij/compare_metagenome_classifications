@@ -50,8 +50,8 @@ rule predict_orfs:
     input:
         SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta"
     output:
-        fasta=WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
-        gff=WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.gff"
+        fasta = WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
+        gff = WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.gff"
     threads: config["threads"]["predict_orfs"]
     conda:
         "envs/CAT.yaml"
@@ -60,9 +60,9 @@ rule predict_orfs:
     benchmark:
         "log/benchmark/predict_orfs.{sample}.txt"
     params:
-        mode=config["prodigal"]["mode"],
-        translation_table=config["prodigal"]["translation_table"],
-        format=config["prodigal"]["format"]        
+        mode = config["prodigal"]["mode"],
+        translation_table = config["prodigal"]["translation_table"],
+        format = config["prodigal"]["format"]        
     shell:
         """
         if [ "{config[prodigal][quiet]" != "0" ]; then
@@ -74,9 +74,9 @@ rule predict_orfs:
 
 rule run_diamond_blastp:
     input:
-        contigs=SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta" ,
-        pred_prot=WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
-        db=DB_DIR + "CAT_prepare_20181212/2018-12-12_CAT_database/2018-12-12.nr.dmnd"
+        contigs = SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta" ,
+        pred_prot = WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
+        db = DB_DIR + "CAT_prepare_20181212/2018-12-12_CAT_database/2018-12-12.nr.dmnd"
     output:
         WORK_DIR + "tmp/{sample}.CAT.alignment.diamond"
     threads: config["threads"]["run_diamond_blastp"]
@@ -87,9 +87,9 @@ rule run_diamond_blastp:
     benchmark:
         repeat("log/benchmark/run_diamond_blasp.{sample}.txt", 1) #change the number depending on how many times you want to time Diamond
     params:
-        top=config["diamond"]["top"],
-        matrix=config["diamond"]["matrix"],
-        evalue=config["diamond"]["evalue"],
+        top = config["diamond"]["top"],
+        matrix = config["diamond"]["matrix"],
+        evalue = config["diamond"]["evalue"],
     shell:
         """
         if [ "{config[diamond][sensitive]" != "0" ]; then
@@ -109,15 +109,15 @@ rule run_diamond_blastp:
 
 rule CAT_classify_contigs:
     input:
-        fasta=SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta",
-        db=DB_DIR + "CAT_prepare_20181212/2018-12-12_CAT_database/",
-        tax=DB_DIR + "CAT_prepare_20181212/2018-12-12_taxonomy/",
-        pred_prot=WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
-        diamond=WORK_DIR + "tmp/{sample}.CAT.alignment.diamond"
+        fasta = SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta",
+        db = DB_DIR + "CAT_prepare_20181212/2018-12-12_CAT_database/",
+        tax = DB_DIR + "CAT_prepare_20181212/2018-12-12_taxonomy/",
+        pred_prot = WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
+        diamond = WORK_DIR + "tmp/{sample}.CAT.alignment.diamond"
     output:
-        clas=WORK_DIR + "results/CAT/{sample}.CAT.contig2classification.txt",
-        log=WORK_DIR + "log/{sample}.CAT.log",
-        orf2lca=WORK_DIR + "results/CAT/{sample}.CAT.ORF2LCA.txt"
+        clas = WORK_DIR + "results/CAT/{sample}.CAT.contig2classification.txt",
+        log = WORK_DIR + "log/{sample}.CAT.log",
+        orf2lca = WORK_DIR + "results/CAT/{sample}.CAT.ORF2LCA.txt"
     threads: config["threads"]["CAT_classify_contigs"]
     conda:
         "envs/CAT.yaml"
@@ -134,8 +134,8 @@ rule CAT_classify_contigs:
         
 rule CAT_add_names:
     input:
-        clas=WORK_DIR + "results/CAT/{sample}.CAT.contig2classification.txt",
-        tax=DB_DIR + "CAT_prepare_20181212/2018-12-12_taxonomy/"
+        clas = WORK_DIR + "results/CAT/{sample}.CAT.contig2classification.txt",
+        tax = DB_DIR + "CAT_prepare_20181212/2018-12-12_taxonomy/"
     output:
         WORK_DIR + "results/CAT/{sample}.CAT.add_names.txt"
     threads: config["threads"]["CAT_classify_contigs"]
@@ -150,8 +150,8 @@ rule CAT_add_names:
         
 rule CAT_summarise:
     input:
-        fasta=SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta",
-        names=WORK_DIR + "results/CAT/{sample}.CAT.add_names.txt"
+        fasta = SOURCE_DIR + "data/minLen_filtered_SPAdes_scaffolds/{sample}_scaffolds_ge500nt.fasta",
+        names = WORK_DIR + "results/CAT/{sample}.CAT.add_names.txt"
     output:
         WORK_DIR + "/results/CAT/{sample}.CAT.summary"
     threads: config["threads"]["CAT_summarise"]
@@ -204,7 +204,7 @@ rule grep_PZN_unclassified_contig_annotations:
         
 rule merge_CAT_PZN_annotations:
     input:
-        names=WORK_DIR + "results/CAT/{sample}.CAT.add_names.txt",
+        names = WORK_DIR + "results/CAT/{sample}.CAT.add_names.txt",
         pzn_clas = WORK_DIR + "tmp/{sample}.PZN.classified.tsv",
         pzn_unclas = WORK_DIR + "tmp/{sample}.PZN.unclassified.tsv"
     output:
@@ -223,8 +223,8 @@ rule CAT_visualise_Krona:
     input:
         WORK_DIR + "tmp/{sample}.CAT.Krona.info.tsv"
     output:
-        minimal=WORK_DIR + "tmp/{sample}.CAT.Krona.info-minimal.tsv",
-        krona=WORK_DIR + "results/figures/{sample}.CAT.Krona.html" 
+        minimal = WORK_DIR + "tmp/{sample}.CAT.Krona.info-minimal.tsv",
+        krona = WORK_DIR + "results/figures/{sample}.CAT.Krona.html" 
     conda:
         "envs/Krona.yaml"
     threads: config["threads"]["CAT_visualise_Krona"]
@@ -241,17 +241,17 @@ rule CAT_visualise_Krona:
         
 rule per_sample_PZN_CAT_comparison:
     input:
-        pzn=[ WORK_DIR + "tmp/{sample}.PZN.classified.tsv", 
+        pzn = [ WORK_DIR + "tmp/{sample}.PZN.classified.tsv", 
              WORK_DIR + "tmp/{sample}.PZN.unclassified.tsv" ],
-        cat=WORK_DIR + "tmp/{sample}.CAT.Krona.info.tsv"
+        cat = WORK_DIR + "tmp/{sample}.CAT.Krona.info.tsv"
     output:
-        table_nr=WORK_DIR + "results/tables/{sample}.PZN-CAT.concordant_taxa.tsv",
-        table_pc=WORK_DIR + "results/tables/{sample}.PZN-CAT.concordant_taxa-percentages.tsv",
-        figure_nr=WORK_DIR + "results/figures/{sample}.PZN-CAT.concordant_taxa.html",
-        venn=WORK_DIR + "results/figures/{sample}.PZN-CAT.venn.png"
+        table_nr = WORK_DIR + "results/tables/{sample}.PZN-CAT.concordant_taxa.tsv",
+        table_pc = WORK_DIR + "results/tables/{sample}.PZN-CAT.concordant_taxa-percentages.tsv",
+        figure_nr = WORK_DIR + "results/figures/{sample}.PZN-CAT.concordant_taxa.html",
+        venn = WORK_DIR + "results/figures/{sample}.PZN-CAT.venn.png"
     #sub-optimal solution to create multiple output files:
     params:
-        list_prefix=WORK_DIR + "results/tables/{sample}.PZN-CAT.comparison." #to be complemented with e.g. "species.tsv"
+        list_prefix = WORK_DIR + "results/tables/{sample}.PZN-CAT.comparison." #to be complemented with e.g. "species.tsv"
     conda:
         "envs/dataframe_visualisation.yaml"
     threads: config["threads"]["per_sample_PZN_CAT_comparison"]
@@ -264,16 +264,16 @@ rule per_sample_PZN_CAT_comparison:
         
 rule overall_PZN_CAT_comparison:
     input:
-        pzn=expand(WORK_DIR + "tmp/{sample}.PZN.{status}.tsv", sample = SAMPLES, status = [ "classified", "unclassified" ]),
-        cat=expand(WORK_DIR + "tmp/{sample}.CAT.Krona.info.tsv", sample = SAMPLES)
+        pzn = expand(WORK_DIR + "tmp/{sample}.PZN.{status}.tsv", sample = SAMPLES, status = [ "classified", "unclassified" ]),
+        cat = expand(WORK_DIR + "tmp/{sample}.CAT.Krona.info.tsv", sample = SAMPLES)
     output:
-        table_nr=WORK_DIR + "results/tables/OVERALL.PZN-CAT.concordant_taxa.tsv",
-        table_pc=WORK_DIR + "results/tables/OVERALL.PZN-CAT.concordant_taxa-percentages.tsv",
-        figure_nr=WORK_DIR + "results/figures/OVERALL.PZN-CAT.concordant_taxa.html",
-        venn=WORK_DIR + "results/figures/OVERALL.PZN-CAT.venn.png",
+        table_nr = WORK_DIR + "results/tables/OVERALL.PZN-CAT.concordant_taxa.tsv",
+        table_pc = WORK_DIR + "results/tables/OVERALL.PZN-CAT.concordant_taxa-percentages.tsv",
+        figure_nr = WORK_DIR + "results/figures/OVERALL.PZN-CAT.concordant_taxa.html",
+        venn = WORK_DIR + "results/figures/OVERALL.PZN-CAT.venn.png",
     #sub-optimal solution to create multiple output files:
     params:
-        list_prefix=WORK_DIR + "results/tables/OVERALL.PZN-CAT.comparison." #to be complemented with e.g. "species.tsv"
+        list_prefix = WORK_DIR + "results/tables/OVERALL.PZN-CAT.comparison." #to be complemented with e.g. "species.tsv"
     conda:
         "envs/dataframe_visualisation.yaml"
     threads: config["threads"]["overall_PZN_CAT_comparison"]
@@ -286,12 +286,12 @@ rule overall_PZN_CAT_comparison:
 
 rule draw_PZN_CAT_superkingdom_bars:
     input:
-        pzn=SOURCE_DIR + "results/profile_read_counts.csv",
-        cat=expand(WORK_DIR + "tmp/{sample}.CAT.Krona.info-minimal.tsv", sample = SAMPLES)
+        pzn = SOURCE_DIR + "results/profile_read_counts.csv",
+        cat = expand(WORK_DIR + "tmp/{sample}.CAT.Krona.info-minimal.tsv", sample = SAMPLES)
     output:
         WORK_DIR + "results/figures/OVERALL.PZN-CAT.composition_graph.html"
     params:
-        samples=expand("{sample}", sample = SAMPLES)
+        samples = expand("{sample}", sample = SAMPLES)
     conda:
         "envs/dataframe_visualisation.yaml"
     threads: config["threads"]["draw_PZN_CAT_superkingdom_bars"]
