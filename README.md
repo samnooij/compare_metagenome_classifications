@@ -48,6 +48,9 @@ https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-
 3. **Get the project code** from GitHub:  
 `git clone [link to project]`
 
+4. **Change directory** into the downloaded folder:  
+`cd classification_comparison`
+
 
 ### 2. Set the parameters to match your setup
 
@@ -79,10 +82,13 @@ _Optional: if you want to **experiment with Prodigal/Diamond parameters**:_
 1. (If using Snakemake from a **conda environment, activate it**.)  
 `source activate snakemake`
 
-2. **Run snakemake**:  
-`snakemake --profile conf`
+2. Do a snakemake-**dry run** to test if the configuration files are correct:
+`snakemake --snakefile Compare_CAT.sm --profile conf -n`
 
-3. **Wait** until the analysis is finished and then **browse the results** in 
+3. **Run snakemake**:  
+`snakemake --snakefile Compare_CAT.sm --profile conf`
+
+4. **Wait** until the analysis is finished and then **browse the results** in 
 the `results/` folder.  
 Figures can be found in `results/figures/` and can be viewed
 directly in a webbrowser. Tables in are in `results/tables/` and can for example
