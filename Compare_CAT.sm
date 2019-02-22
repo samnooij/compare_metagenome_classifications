@@ -37,10 +37,10 @@ SAMPLES = config["samples"]
 
 rule all:
     input:
-        expand( "{sample}.CAT.Krona.html", sample = SAMPLES),
-        expand( "{sample}.PZN-CAT.venn.png", sample = SAMPLES),
-        "OVERALL.PZN-CAT.venn.png",
-        "OVERALL.PZN-CAT.composition_graph.html"
+        expand( WORK_DIR + "results/figures/{sample}.CAT.Krona.html", sample = SAMPLES),
+        expand( WORK_DIR + "results/figures/{sample}.PZN-CAT.venn.png", sample = SAMPLES),
+        WORK_DIR + "results/figures/OVERALL.PZN-CAT.venn.png",
+        WORK_DIR + "results/figures/OVERALL.PZN-CAT.composition_graph.html"
         
 localrules: grep_PZN_contig_classifications, grep_PZN_unclassified_contig_annotations,
     merge_CAT_PZN_annotations, CAT_visualise_Krona, per_sample_PZN_CAT_comparison, 
