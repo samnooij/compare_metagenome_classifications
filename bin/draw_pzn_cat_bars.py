@@ -106,17 +106,17 @@ def draw_stacked_bars(pzn_df, cat_df):
         for tool in [ "PZN", "CAT" ]:
             factors.append((sample, tool))
             if tool == "PZN":
-                arch.append(int(pzn_df[pzn_df["Sample_name"] == sample]["Archaea"]))
-                bact.append(int(pzn_df[pzn_df["Sample_name"] == sample]["Bacteria"]))
-                euk.append(int(pzn_df[pzn_df["Sample_name"] == sample]["Eukaryota"]))
-                vir.append(int(pzn_df[pzn_df["Sample_name"] == sample]["Viruses"]))
-                uncl.append(int(pzn_df[pzn_df["Sample_name"] == sample]["not classified"]))
+                arch.append(pzn_df[pzn_df["Sample_name"] == sample]["Archaea"].iloc[0])
+                bact.append(pzn_df[pzn_df["Sample_name"] == sample]["Bacteria"].iloc[0])
+                euk.append(pzn_df[pzn_df["Sample_name"] == sample]["Eukaryota"].iloc[0])
+                vir.append(pzn_df[pzn_df["Sample_name"] == sample]["Viruses"].iloc[0])
+                uncl.append(pzn_df[pzn_df["Sample_name"] == sample]["not classified"].iloc[0])
             elif tool == "CAT":
-                arch.append(int(cat_df[cat_df["Sample_name"] == sample]["Archaea"]))
-                bact.append(int(cat_df[cat_df["Sample_name"] == sample]["Bacteria"]))
-                euk.append(int(cat_df[cat_df["Sample_name"] == sample]["Eukaryota"]))
-                vir.append(int(cat_df[cat_df["Sample_name"] == sample]["Viruses"]))
-                uncl.append(int(cat_df[cat_df["Sample_name"] == sample]["not classified"]))
+                arch.append(cat_df[cat_df["Sample_name"] == sample]["Archaea"].iloc[0])
+                bact.append(cat_df[cat_df["Sample_name"] == sample]["Bacteria"].iloc[0])
+                euk.append(cat_df[cat_df["Sample_name"] == sample]["Eukaryota"].iloc[0])
+                vir.append(cat_df[cat_df["Sample_name"] == sample]["Viruses"].iloc[0])
+                uncl.append(cat_df[cat_df["Sample_name"] == sample]["not classified"].iloc[0])
                 
     source = ColumnDataSource(data=dict(
         x=factors,
