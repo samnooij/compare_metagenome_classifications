@@ -82,7 +82,7 @@ def sum_superkingdoms(classified_file):
             superkingdom_sums[superkingdom] = 0
         else:
             pass
-    superkingdom_sums["Sample_name"] = classified_file.split('.')[0]
+    superkingdom_sums["Sample_name"] = classified_file.split('.')[0].split('/')[-1]
         
     return(superkingdom_sums)
 
