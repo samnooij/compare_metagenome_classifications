@@ -115,9 +115,9 @@ rule CAT_classify_contigs:
         pred_prot = WORK_DIR + "tmp/{sample}.CAT.predicted_proteins.faa",
         diamond = WORK_DIR + "tmp/{sample}.CAT.alignment.diamond"
     output:
-        clas = WORK_DIR + "results/CAT/{sample}.CAT.contig2classification.txt",
-        log = WORK_DIR + "log/{sample}.CAT.log",
-        orf2lca = WORK_DIR + "results/CAT/{sample}.CAT.ORF2LCA.txt"
+        clas = WORK_DIR + "{sample}.CAT.contig2classification.txt",
+        log = WORK_DIR + "{sample}.CAT.log",
+        orf2lca = WORK_DIR + "{sample}.CAT.ORF2LCA.txt"
     threads: config["threads"]["CAT_classify_contigs"]
     conda:
         "envs/CAT.yaml"
@@ -128,9 +128,26 @@ rule CAT_classify_contigs:
     shell:
         """
         CAT contigs -c {input.fasta} -d {input.db} -t {input.tax} \
-        -p {input.pred_prot} -a {input.diamond} -o {wildcards.sample}.CAT
+        -p {input.pred_prot} -a {input.diamond} -o {WORK_DIR}{wildcards.sample}.CAT
         """
         # left out the "> {log} 2>&1 because CAT makes its own log
+        
+rule move_CAT_output:
+    input:
+        clas = expand(WORK_DIR + "{sample}.CAT.contig2classification.txt", sample = SAMPLES),
+        log = expand(WORK_DIR + "{sample}.CAT.log", sample = SAMPLES),
+        orf2lca = expand(WORK_DIR + "{sample}.CAT.ORF2LCA.txt", sample = SAMPLES)
+    output:
+        clas = expand(WORK_DIR + "results/CAT/{sample}.CAT.contig2classification.txt", sample = SAMPLES),
+        log = expand(WORK_DIR + "log/{sample}.CAT.log", sample = SAMPLES),
+        orf2lca = expand(WORK_DIR + "results/CAT/{sample}.CAT.ORF2LCA.txt", sample = SAMPLES)
+    threads: config["threads"]["move_CAT_output"]
+    log:
+        "log/move_CAT_output.txt"
+    benchmark:
+        "log/benchmark/move_CAT_output.txt"
+    shell:
+        "mv *.CAT.*.txt results/CAT/ && mv *.CAT.log log/ > {log} 2>&1"
         
 rule CAT_add_names:
     input:
