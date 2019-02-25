@@ -28,7 +28,7 @@ threads:
   CAT_visualise_Krona: 1
   per_sample_PZN_CAT_comparison: 1
   overall_PZN_CAT_comparison: 1
-  PZN_CAT_superkingdom_bars: 1
+  draw_PZN_CAT_superkingdom_bars: 1
   
 #Custom parameters:
 prodigal:
