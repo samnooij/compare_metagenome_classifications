@@ -56,7 +56,7 @@ https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-
 
 _Optional: if **not working on the same HPC** cluster:_  
  - Edit the lines starting with "drmaa" and "jobname" in `conf/config.yaml` using 
-a text editor. (Adjust to your own system, or remove the lines.  
+a text editor. (Adjust to your own system, or remove the lines.)  
 Also, if you have more or fewer than 12 CPU cores on your machine, you can edit
 the line "run_diamond_blastp: 12" under "threads:" accordingly.
 
