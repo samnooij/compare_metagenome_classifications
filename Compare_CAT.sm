@@ -225,10 +225,10 @@ rule merge_CAT_PZN_annotations:
         pzn_clas = WORK_DIR + "tmp/{sample}.PZN.classified.tsv",
         pzn_unclas = WORK_DIR + "tmp/{sample}.PZN.unclassified.tsv"
     output:
-        WORK_DIR + "/tmp/{sample}.CAT.Krona.info.tsv"
+        WORK_DIR + "tmp/{sample}.CAT.Krona.info.tsv"
     conda:
         "envs/dataframe_visualisation.yaml"
-        log:
+    log:
         "log/merge_CAT_PZN_annotations.{sample}.txt"
     benchmark:
         "log/benchmark/merge_CAT_PZN_annotations.{sample}.txt"
@@ -297,7 +297,7 @@ rule overall_PZN_CAT_comparison:
     log:
         "log/overall_PZN_CAT_comparison.txt"
     benchmark:
-        "log/benchmark/overall_PZN_CAT_comparison.txt
+        "log/benchmark/overall_PZN_CAT_comparison.txt"
     script:
         "bin/classification_concordances.py"
 
