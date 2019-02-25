@@ -106,6 +106,29 @@ _any_ taxonomic rank (this should catch most bacteria and bacteriophages).)
 
 -----
 
+## Pipeline description
+
+The current pipeline takes data from 
+[Jovian](https://gitl01-int-p.rivm.nl/schmitzd/PZN) (formerly known as "PZN").
+It starts with the assembled contigs from 
+[SPAdes](http://cab.spbu.ru/software/spades/), filtered with a minimum 
+nucleotide length (default = 500). On them ORFs are predicted with 
+[Prodigal](http://compbio.ornl.gov/prodigal/). These ORFs are then matched to 
+the NCBI BLAST nr database with
+[Diamond](http://ab.inf.uni-tuebingen.de/software/diamond/) blastp and 
+classified using CAT, after which the whole contig is assigned a taxonomic name.
+
+Simultaneously, PZN classifications per contig, and annotations of unclassified
+contigs are collected. These are merged with the classifications from CAT, and
+finally these are compared and visualised in several different ways, per sample
+and over all included samples (summed).
+
+Below is a visualisation of the steps in the pipeline (a Snakemake rulegraph).
+
+![Compare CAT rulegraph](data/rulegraph.png)
+
+-----
+
 ## Licence
 
 This project is licensed under the terms of the [GNU GPLv2 licence](LICENSE).
