@@ -152,7 +152,7 @@ in the folder `results/figures/`. Currently, the following figures are made:
   read set that map to the classified contigs. These figures get the extension
   `Krona.html`.
   
- - **Concordant taxa histogram**
+ - **Concordant taxa histogram**  
   For each sample, as well as over all samples, we compare the classifications
   of each contig and see whether the two classification methods give identical
   classifications (taxa) or not, at 7 taxonomic ranks (X-axis). We count the 
@@ -171,7 +171,7 @@ in the folder `results/figures/`. Currently, the following figures are made:
 
 ![Classification concordance](data/example/OVERALL.PZN-CAT.concordant_taxa.png)
 
- - **Taxonomic profiles**
+ - **Taxonomic profiles**  
   For all samples, stacked bar charts represent the taxonomic profile generated
   by each classification tool, summarising taxa on the superkingdom rank. 
   Again, classified contigs are quantified by the number of reads that map to
@@ -182,11 +182,11 @@ in the folder `results/figures/`. Currently, the following figures are made:
   _compare profiles between the two methods. Also, it can be used to spot_
   _differences that are worth investigating further (e.g. one tools reports_
   _a high number of eukaryotes, while the other reports mostly bacteria:_
-  _which tool is right?_
+  _which tool is right?)_
 
 ![Taxanomic profiles](data/example/OVERALL.PZN-CAT.composition_graph.png)
 
- - **Overlapping classifications (taxa)**
+ - **Overlapping classifications (taxa)**  
   Venn diagrams visualise the overlap between the reported taxa by each tool,
   at seven taxonomic ranks. At each rank, a deduplicated list of taxa is 
   collected for each tool and checked for overlap with the other tool. The taxa
@@ -205,7 +205,7 @@ The tables are a different way of showing the same data visualised with the
 figures. They may be viewed with spreadsheet programmes, or can be further
 analysed with command-line tools. They are saved under `results/tables/`.
 
- - **List of classified taxa per tool**
+ - **List of classified taxa per tool**  
   These are tab-separated text files of the taxa behind the Venn diagrammes.
   They are generated per sample and as 'overall' lists and contain 3 columns:  
   1. 'Overlap': taxa that are reported by both methods
@@ -220,10 +220,10 @@ analysed with command-line tools. They are saved under `results/tables/`.
   Change these variables to match your research question:
   `cut -f [A] [B].PZN-CAT.comparison.[C].tsv | grep [D] [E]`, where:  
   A = 1-3 (overlap (both), PZN (Jovian), CAT)  
-  B = sample name, or "OVERLAP" for all samples
+  B = sample name, or "OVERLAP" for all samples  
   C = taxonomic rank (superkingdom, phylum, class, order, family, genus, 
-  species, or "*" for all)
-  D = the string to search for (e.g. "virus" or "bacter")
+  species, or "*" for all)  
+  D = the string to search for (e.g. "virus" or "bacter")  
   E = optional, if you want counts rather than a list of names, add `| wc -l`
   to your command to count the lines of output
   
@@ -240,7 +240,7 @@ analysed with command-line tools. They are saved under `results/tables/`.
 
 _(For examples, see [data/example](data/example).)_
 
- - **Table of concordant number of taxa**
+ - **Table of concordant number of taxa**  
   The numbers behind the "concordant taxa histogram" are also saved as 
   tab-separated text files: both the absolute numbers and the percentages.
   They are called `concordant_taxa.tsv` and `concordant_taxa-percentages.tsv`,
@@ -248,25 +248,25 @@ _(For examples, see [data/example](data/example).)_
 
 ### Other files
 
- - **Log files**
+ - **Log files**  
   Each step or subprocess in the pipeline generates a log file. These store
   the Terminal output of the commands (stderr and/or stdout) in the `log/` 
   folder.  
   Secondly, benchmark logs are kept under `log/benchmark/` that log the runtime
-  and memory usage of the commands.
+  and memory usage of the commands.  
   When using the BioGrid cluster, or other LSF/DRMAA-compatible machine, drmaa
   logs are kept under `log/drmaa/` - separating stderr in a separate file 
   (`.err`) and a complete LSF log with the snakemake rule, command, times and
   resources used in another (`.out`) file.
  
- - **CAT output files**
+ - **CAT output files**  
   CAT generates a list of output files, from ORF LCAs (Lowest Common Ancestors
   per Open Reading Frame), to contig classifications, to official taxonomic
   names. These are stored under `results/CAT/`.  
   CAT also creates its own log file, which can be found under `log/` as 
   `[sample].CAT.log`.
 
- - **Intermediary (temporary) files**
+ - **Intermediary (temporary) files**  
   Some indermediate files are stored in the `tmp/` directory, including
   Diamond blastp output, Prodigal predicted ORFs and tables with information
   for Krona.
