@@ -129,6 +129,150 @@ Below is a visualisation of the steps in the pipeline (a Snakemake rulegraph).
 
 -----
 
+## Pipeline output
+
+The pipeline generates files in each step of the process. All output files are
+described below. The following folders are created during the analysis:
+
+| **Name**   | **Description** |
+| ---------- | --------------- |
+| `results/` | Holds directories `figures/`, `tables/` and `CAT/` and is where important results are stored |
+| `log/`     | Holds directories `benchmark/` and `drmaa/` and contains information about running the commands (times, memory use, errors, etc.) |
+| `tmp/`     | Stores temporary files and intermediates to the pipeline's output; may be interesting for debugging |
+
+### Figures
+
+The most important output of the pipeline are the figurs, which are generated
+in the folder `results/figures/`. Currently, the following figures are made:
+
+ - **Krona charts**  
+  For each sample, CAT classifies the contigs. These classified contigs are
+  visualised with [Krona](https://github.com/marbl/Krona/wiki) charts, in which
+  the size of the taxa corresponds to the number of reads from the original
+  read set that map to the classified contigs. These figures get the extension
+  `Krona.html`.
+  
+ - **Concordant taxa histogram**
+  For each sample, as well as over all samples, we compare the classifications
+  of each contig and see whether the two classification methods give identical
+  classifications (taxa) or not, at 7 taxonomic ranks (X-axis). We count the 
+  number of contigs (Y-axis) that have identical classifications ("consistently
+  classified"), those that have different classifications ("inconsistently
+  classified", e.g. one tool reports "Bacteria" and the other "Viruses" at
+  the superkingdom level), those that only one of the two methods could
+  classify ("only pzn" and "only cat"), and finally contigs that neither tool
+  was able to classify ("consistently unclassified").  
+  These figures can be recognised by the `concordant_taxa.html` extension,
+  and are interactive: mouse-over to view exact contig numbers, and drag if
+  anything disappears under the legend. There is also a tab that uses 
+  percentages rather than absolute contig counts.  
+  _This figure shows the fraction of overlap between the results of the two_
+  _tools and also which tool could classify more contigs._
+
+![Classification concordance](data/example/OVERALL.PZN-CAT.concordant_taxa.png)
+
+ - **Taxonomic profiles**
+  For all samples, stacked bar charts represent the taxonomic profile generated
+  by each classification tool, summarising taxa on the superkingdom rank. 
+  Again, classified contigs are quantified by the number of reads that map to
+  them.  
+  This figure has the extension `composition_graph.html` and is also an
+  interactive figure that has mouse-over labels and can be dragged.  
+  _This figure can be used to estimate taxonomic profiles from samples and_
+  _compare profiles between the two methods. Also, it can be used to spot_
+  _differences that are worth investigating further (e.g. one tools reports_
+  _a high number of eukaryotes, while the other reports mostly bacteria:_
+  _which tool is right?_
+
+![Taxanomic profiles](data/example/OVERALL.PZN-CAT.composition_graph.png)
+
+ - **Overlapping classifications (taxa)**
+  Venn diagrams visualise the overlap between the reported taxa by each tool,
+  at seven taxonomic ranks. At each rank, a deduplicated list of taxa is 
+  collected for each tool and checked for overlap with the other tool. The taxa
+  counted in the diagrams are stored separately (see [Tables](#tables) below).  
+  These figures end on `venn.png`.  
+  _The Venn diagrams also show the overlap in classifications, but now_
+  _quantified by the taxa, not by reads. It can also be used to compare the_
+  _output of the two tools. The taxa that appear in both lists are highly_
+  _likely to be actually present in the original sample/patient._
+
+![Classification overlap](data/example/OVERALL.PZN-CAT.venn.png)
+
+### Tables
+
+The tables are a different way of showing the same data visualised with the
+figures. They may be viewed with spreadsheet programmes, or can be further
+analysed with command-line tools. They are saved under `results/tables/`.
+
+ - **List of classified taxa per tool**
+  These are tab-separated text files of the taxa behind the Venn diagrammes.
+  They are generated per sample and as 'overall' lists and contain 3 columns:  
+  1. 'Overlap': taxa that are reported by both methods
+  2. 'PZN': taxa reported only by Jovian (formerly PZN)
+  3. 'CAT': taxa reported only by CAT  
+  The tables' names end with `comparison.[rank].tsv` and can be used to answer
+  questions such as: "which viral species were identified in sample X by both 
+  methods?" usind the command: 
+  `cut -f 1 X.PZN-CAT.comparison.species.tsv | grep "vir"` or "how many genera
+  with "bacter" in their name were only reported by CAT?" with:
+  `cut -f 3 OVERALL.PZN-CAT.comparison.genus.tsv | grep "bacter" | wc -l`.  
+  Change these variables to match your research question:
+  `cut -f [A] [B].PZN-CAT.comparison.[C].tsv | grep [D] [E]`, where:  
+  A = 1-3 (overlap (both), PZN (Jovian), CAT)  
+  B = sample name, or "OVERLAP" for all samples
+  C = taxonomic rank (superkingdom, phylum, class, order, family, genus, 
+  species, or "*" for all)
+  D = the string to search for (e.g. "virus" or "bacter")
+  E = optional, if you want counts rather than a list of names, add `| wc -l`
+  to your command to count the lines of output
+  
+  This table looks something like this and is _alphabetically sorted_:
+  
+| **Overlap**     | **PZN**            | **CAT**        |
+| --------------- | ------------------ | -------------- |
+| Anelloviridae   | Campylobacteraceae | Chlamydiaceae  |
+| Bacillaceae     | Cyprinidae         | Cytophagaceae  |
+| Enterococcaceae | Fabaceae           | Eubacteriaceae |
+| Microviridae    | Formicidae         | Muribaculoceae |
+| Siphoviridae    | Muridae            |                |
+|                 | Staphylococcaceae  |                |
+
+_(For examples, see [data/example](data/example).)_
+
+ - **Table of concordant number of taxa**
+  The numbers behind the "concordant taxa histogram" are also saved as 
+  tab-separated text files: both the absolute numbers and the percentages.
+  They are called `concordant_taxa.tsv` and `concordant_taxa-percentages.tsv`,
+  respectively.
+
+### Other files
+
+ - **Log files**
+  Each step or subprocess in the pipeline generates a log file. These store
+  the Terminal output of the commands (stderr and/or stdout) in the `log/` 
+  folder.  
+  Secondly, benchmark logs are kept under `log/benchmark/` that log the runtime
+  and memory usage of the commands.
+  When using the BioGrid cluster, or other LSF/DRMAA-compatible machine, drmaa
+  logs are kept under `log/drmaa/` - separating stderr in a separate file 
+  (`.err`) and a complete LSF log with the snakemake rule, command, times and
+  resources used in another (`.out`) file.
+ 
+ - **CAT output files**
+  CAT generates a list of output files, from ORF LCAs (Lowest Common Ancestors
+  per Open Reading Frame), to contig classifications, to official taxonomic
+  names. These are stored under `results/CAT/`.  
+  CAT also creates its own log file, which can be found under `log/` as 
+  `[sample].CAT.log`.
+
+ - **Intermediary (temporary) files**
+  Some indermediate files are stored in the `tmp/` directory, including
+  Diamond blastp output, Prodigal predicted ORFs and tables with information
+  for Krona.
+ 
+-----
+
 ## Licence
 
 This project is licensed under the terms of the [GNU GPLv2 licence](LICENSE).
