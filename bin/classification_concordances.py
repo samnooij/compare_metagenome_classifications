@@ -331,7 +331,7 @@ def main(cat_df):
     concordance_df = find_consistencies(merged_df)
 
     #Export the number of concordances to a file:
-    concordance_df.to_csv(snakemake.output["table_nr"], sep='\t')
+    concordance_df.to_csv(snakemake.output["table_nr"], sep='\t', index = False)
 
     #Calculate percentages:
     concordance_percentages = pd.DataFrame()
@@ -341,8 +341,8 @@ def main(cat_df):
             concordance_percentages[column] = concordance_df[column] / total_contigs * 100
         else:
             pass
-    #Also export these numbers to a file:
-    concordance_percentages.to_csv(snakemake.output["table_pc"], sep='\t')
+    #Also export percentages to a file:
+    concordance_percentages.to_csv(snakemake.output["table_pc"], sep='\t', index = False)
 
     #And plot the concordances in a bar graph:
     plot_bars(df = concordance_df,
