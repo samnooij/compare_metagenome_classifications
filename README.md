@@ -9,9 +9,9 @@ to our in-house metagenomics pipeline, formerly known as "Pipeline Zonder Naam" 
 ## Content
 - [Requirements](#requirements)
 - [User manual](#user-manual)
-  - [Initial setup](#initial-setup)
-  - [Set parameters](#set-the-parameters-to-match-your-setup)
-  - [Run the pipeline](#run-cat-and-compare-the-results)
+  - [Initial setup](#1-initial-setup)
+  - [Set parameters](#2-set-the-parameters-to-match-your-setup)
+  - [Run the pipeline](#3-run-cat-and-compare-the-results)
 - [Pipeline description](#pipeline-description)
 - [Pipeline output](#pipeline-output)
   - [Figures](#figures)
