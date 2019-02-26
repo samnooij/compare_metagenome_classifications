@@ -28,13 +28,6 @@ between classification algorithms. Visualise the results as (1) tables,
 (2) bar graphs, (3) Venn diagrammes, and (4) lists of taxa by each/either 
 method.
 
-Ideally this script should be able to:
- - detect if the input is from 1 or more samples to generate sample-specific 
-   statistics or "overall" stats
- - count concordances between the classification methods
- - make tables and figures with those concordance-numbers
- - draw Venn diagrammes
-
 INPUT:
  - tab-separated tables of metagenomics classifications divided in taxonomic
    lineages, e.g. a table with columns "superkingdom", "phylum", ..., "genus",
