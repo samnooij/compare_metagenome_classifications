@@ -85,7 +85,7 @@ rule run_diamond_blastp:
     log:
         "log/run_diamond_blastp.{sample}.txt"
     benchmark:
-        repeat("log/benchmark/run_diamond_blasp.{sample}.txt", 1) #change the number depending on how many times you want to time Diamond
+        repeat("log/benchmark/run_diamond_blastp.{sample}.txt", 1) #change the number depending on how many times you want to time Diamond
     params:
         top = config["diamond"]["top"],
         matrix = config["diamond"]["matrix"],
