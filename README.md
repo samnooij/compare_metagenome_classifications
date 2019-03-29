@@ -1,6 +1,7 @@
 # Classification comparison
 
-Compare classifications of different tools in a metagenomics pipeline.  
+Compare taxonomic classifications of different tools in a 
+metagenomics pipeline.  
 Initial version: Compare [Contig Annotation Tool (CAT)](https://github.com/dutilh/CAT/)
 to [Jovian](https://github.com/DennisSchmitz/Jovian). (_N.B. Jovian is in a private repository at the moment._)
 
