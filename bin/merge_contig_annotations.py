@@ -19,18 +19,18 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-#Merge contig annotations from CAT classifications ("add_names.txt" file) and PZN ("all_taxClassified.tsv" + "all_tax_Unclassified.tsv").
+#Merge contig annotations from CAT classifications ("add_names.txt" file) and Jovian ("all_taxClassified.tsv" + "all_taxUnclassified.tsv").
 # Primary goal: match reads numbers to contigs to quantify CAT profiles and generate Krona plots.
 
 import pandas as pd
 
 if __name__ == "__main__":
     #Open the files as Pandas dataframes:
-    pzn_clas_df = pd.read_csv(snakemake.input["pzn_clas"], delimiter='\t')
-    pzn_unclas_df = pd.read_csv(snakemake.input["pzn_unclas"], delimiter='\t')
+    jovian_clas_df = pd.read_csv(snakemake.input["jovian_clas"], delimiter='\t')
+    jovian_unclas_df = pd.read_csv(snakemake.input["jovian_unclas"], delimiter='\t')
     cat_clas_df = pd.read_csv(snakemake.input["names"], delimiter='\t')
     
-    #Make sure the CAT dataframe has the same column name as the PZN dataframe and that it is sorted correctly!
+    #Make sure the CAT dataframe has the same column name as the Jovian dataframe and that it is sorted correctly!
     cat_clas_df["# contig"] = cat_clas_df["# contig"].astype(str)
     cat_clas_df.rename(columns={ "# contig" : "#ID" }, inplace=True)
     cat_clas_df['sort'] = cat_clas_df['#ID'].str.extract('(\d+)', expand=False).astype(int)
@@ -38,16 +38,16 @@ if __name__ == "__main__":
     cat_clas_df = cat_clas_df.drop('sort', axis=1)
     cat_clas_df.reset_index(inplace=True, drop=True)
     
-    #Concatenate PZN dataframes into one long dataframe:
-    pzn_contigs_df = pd.concat([pzn_clas_df, pzn_unclas_df], sort=True)
+    #Concatenate Jovian dataframes into one long dataframe:
+    jovian_contigs_df = pd.concat([jovian_clas_df, jovian_unclas_df], sort=True)
     
     #Calculate the number of reads mapped to each contig:
-    pzn_contigs_df["reads"] = pzn_contigs_df.Plus_reads + pzn_contigs_df.Minus_reads
-    minimal_pzn_df = pzn_contigs_df[["#ID", "reads"]]
-    minimal_pzn_df.columns = [ "#ID", "reads" ]
+    jovian_contigs_df["reads"] = jovian_contigs_df.Plus_reads + jovian_contigs_df.Minus_reads
+    minimal_jovian_df = jovian_contigs_df[["#ID", "reads"]]
+    minimal_jovian_df.columns = [ "#ID", "reads" ]
     
-    #Merge PZN annotations to CAT classification:
-    merged_df = minimal_pzn_df.merge(cat_clas_df, left_on="#ID", right_on="#ID", sort=True)
+    #Merge Jovian annotations to CAT classification:
+    merged_df = minimal_jovian_df.merge(cat_clas_df, left_on="#ID", right_on="#ID", sort=True)
     
     #Remove unnecessary columns:
     merged_df.drop(columns=["classification", 

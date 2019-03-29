@@ -22,13 +22,13 @@ threads:
   move_CAT_output: 1
   CAT_add_names: 1
   CAT_summarise: 1
-  grep_PZN_contig_classifications: 1
-  grep_PZN_unclassified_contig_annotations: 1
-  merge_CAT_PZN_annotations: 1
+  grep_Jovian_contig_classifications: 1
+  grep_Jovian_unclassified_contig_annotations: 1
+  merge_CAT_Jovian_annotations: 1
   CAT_visualise_Krona: 1
-  per_sample_PZN_CAT_comparison: 1
-  overall_PZN_CAT_comparison: 1
-  draw_PZN_CAT_superkingdom_bars: 1
+  per_sample_Jovian_CAT_comparison: 1
+  overall_Jovian_CAT_comparison: 1
+  draw_Jovian_CAT_superkingdom_bars: 1
   
 #Custom parameters:
 prodigal:

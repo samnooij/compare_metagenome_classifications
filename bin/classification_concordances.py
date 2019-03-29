@@ -32,7 +32,7 @@ INPUT:
  - tab-separated tables of metagenomics classifications divided in taxonomic
    lineages, e.g. a table with columns "superkingdom", "phylum", ..., "genus",
    "species" AND a column with contig names (to compare contig-to-contig 
-   classifications by e.g. PZN and CAT) 
+   classifications by e.g. Jovian and CAT) 
    
    ## OR -pehaps a later addition- a column with number of reads 
    classified as the given taxon (to compare read-based classifications to 
@@ -91,31 +91,31 @@ def find_consistencies(df):
                    "consistently_classified" : [],
                    "inconsistently_classified" : [],
                    "consistently_unclassified" : [],
-                   "only_pzn" : [],
+                   "only_jovian" : [],
                    "only_cat" : []
                    }
     
     for rank in RANKS:
         concordances["Rank"].append(rank)
         #If both methods did not report the contig as "not classified", it was classified by both methods:
-        classified_contigs = sum((df["%s_pzn" % rank] != "not classified") & (df["%s_cat" % rank] != "not classified"))
+        classified_contigs = sum((df["%s_jovian" % rank] != "not classified") & (df["%s_cat" % rank] != "not classified"))
         concordances["classified_contigs"].append(classified_contigs)
-        #If one of the methods (PZN) did not report "not classified" and 
-        # the classifications of PZN and CAT are identical, the contig has been consistently classified:
-        consistently_classified = sum((df["%s_pzn" % rank] != "not classified") & (df["%s_pzn" % rank] == df["%s_cat" % rank]))
+        #If one of the methods (Jovian) did not report "not classified" and 
+        # the classifications of Jovian and CAT are identical, the contig has been consistently classified:
+        consistently_classified = sum((df["%s_jovian" % rank] != "not classified") & (df["%s_jovian" % rank] == df["%s_cat" % rank]))
         concordances["consistently_classified"].append(consistently_classified)
         #The inconsistently classified contigs are those that were classified by both methods, 
         # but with unequal taxa (total classified - consistent):
         inconsistently_classified = classified_contigs - consistently_classified
         concordances["inconsistently_classified"].append(inconsistently_classified)
-        #Then there are contigs that PZN could classify, but CAT not:
-        only_pzn = sum((df["%s_pzn" % rank] != "not classified") & (df["%s_cat" % rank] == "not classified"))
-        concordances["only_pzn"].append(only_pzn)
-        #And contigs that only CAT could classify, and PZN not:
-        only_cat = sum((df["%s_pzn" % rank] == "not classified") & (df["%s_cat" % rank] != "not classified"))
+        #Then there are contigs that Jovian could classify, but CAT not:
+        only_jovian = sum((df["%s_jovian" % rank] != "not classified") & (df["%s_cat" % rank] == "not classified"))
+        concordances["only_jovian"].append(only_jovian)
+        #And contigs that only CAT could classify, and Jovian not:
+        only_cat = sum((df["%s_jovian" % rank] == "not classified") & (df["%s_cat" % rank] != "not classified"))
         concordances["only_cat"].append(only_cat)
         #And the contigs for which both methods report "not classified" are consistently unclassified:
-        consistently_unclassified = sum((df["%s_pzn" % rank] == "not classified") & (df["%s_pzn" % rank] == df["%s_cat" % rank]))
+        consistently_unclassified = sum((df["%s_jovian" % rank] == "not classified") & (df["%s_jovian" % rank] == df["%s_cat" % rank]))
         concordances["consistently_unclassified"].append(consistently_unclassified)
         
     ## THANKS askewchan (https://stackoverflow.com/a/16343791) for telling about the use of '&' with conditionals in dataframes!
@@ -160,17 +160,17 @@ def plot_bars(df, perc, outfile, total):
                                            consistently_classified = df["consistently_classified"],
                                            inconsistently_classified = df["inconsistently_classified"],
                                            consistently_unclassified = df["consistently_unclassified"],
-                                           only_pzn = df["only_pzn"],
+                                           only_jovian = df["only_jovian"],
                                            only_cat = df["only_cat"]
                                           )
                                 )
         
-    title = "Classified contigs comparison (PZN-CAT)"
+    title = "Classified contigs comparison (Jovian-CAT)"
     ymax = find_suitable_y(total)
 
     colors = [ "#0000A6","#63FFAC","#B79762","#004D43", "#FFDBE5" ]
     parts = [ "consistently_classified", "inconsistently_classified",
-             "only_pzn", "only_cat", "consistently_unclassified" ]
+             "only_jovian", "only_cat", "consistently_unclassified" ]
 
     nr_fig = figure(x_range=df["Rank"], plot_height = 600, plot_width = 1000,
                    title = title, toolbar_location=None, tools = "hover, pan",
@@ -190,7 +190,7 @@ def plot_bars(df, perc, outfile, total):
                                            consistently_classified = perc["consistently_classified"],
                                            inconsistently_classified = perc["inconsistently_classified"],
                                            consistently_unclassified = perc["consistently_unclassified"],
-                                           only_pzn = perc["only_pzn"],
+                                           only_jovian = perc["only_jovian"],
                                            only_cat = perc["only_cat"]
                                           )
                                 )
@@ -234,7 +234,7 @@ def find_taxa(df):
 
 def draw_venn(taxa_dict):
     """
-    Make Venn diagrammes for the taxa identified by different methods (i.e. PZN and CAT).
+    Make Venn diagrammes for the taxa identified by different methods (i.e. Jovian and CAT).
     input: dictionary with list of taxa classified per taxonomic rank, per method
     output: Venn diagrammes as png file
     """
@@ -254,7 +254,7 @@ def draw_venn(taxa_dict):
     for i in range(len(RANKS)):
     #Make Venn diagrammes for each rank as subplot (7 figures in 1 file)
         ax = fig.add_subplot(coordinates[i])
-        diag = venn2([taxa_dict["%s_pzn" % RANKS[i]], taxa_dict["%s_cat" % RANKS[i]]], set_labels = ('PZN', 'CAT'))
+        diag = venn2([taxa_dict["%s_jovian" % RANKS[i]], taxa_dict["%s_cat" % RANKS[i]]], set_labels = ('Jovian', 'CAT'))
         diag.get_patch_by_id('010').set_color('skyblue')
         diag.get_patch_by_id('110').set_color('palegoldenrod')
         diag.get_patch_by_id('100').set_color('sienna')
@@ -270,18 +270,18 @@ def write_tables(taxa_dict):
     Write the taxa that have been classified by different methods, and the overlap between the two
     to tab-separated text files.
     input: dictionary with taxa per rank per method
-    output: tab-separated files (e.g. {sample}.PZN-CAT.comparison.species.tsv)
+    output: tab-separated files (e.g. {sample}.Jovian-CAT.comparison.species.tsv)
     """
     for rank in RANKS:
-        overlap = sorted(list(set(taxa_dict["%s_pzn" % rank]) & set(taxa_dict["%s_cat" % rank])))
+        overlap = sorted(list(set(taxa_dict["%s_jovian" % rank]) & set(taxa_dict["%s_cat" % rank])))
         #overlap thanks to Mark Byers: https://stackoverflow.com/a/3697438
-        unique_pzn = sorted(list(set(taxa_dict["%s_pzn" % rank]) - set(taxa_dict["%s_cat" % rank])))
-        unique_cat = sorted(list(set(taxa_dict["%s_cat" % rank]) - set(taxa_dict["%s_pzn" % rank])))
+        unique_jovian = sorted(list(set(taxa_dict["%s_jovian" % rank]) - set(taxa_dict["%s_cat" % rank])))
+        unique_cat = sorted(list(set(taxa_dict["%s_cat" % rank]) - set(taxa_dict["%s_jovian" % rank])))
         #uniques thanks to Javed: https://stackoverflow.com/a/47264446
     
         with open("%s%s.tsv" % (snakemake.params["list_prefix"], rank), 'w') as outfile:
-            outfile.write("Overlap\tPZN\tCAT\n")
-            for a, b, c in zl(overlap, unique_pzn, unique_cat, fillvalue=''):
+            outfile.write("Overlap\tJovian\tCAT\n")
+            for a, b, c in zl(overlap, unique_jovian, unique_cat, fillvalue=''):
                 outfile.write("{0:20s}\t{1:20s}\t{2:20s}\n".format(a, b, c))
                 
     return(None)
@@ -290,23 +290,23 @@ def main(cat_df):
     """
     Main execution of the script: does all the collection of data from files,
     counting of contigs and taxonomic classifications and concordances
-    between PZN and CAT.
+    between Jovian and CAT.
     Input:
         Pandas DataFrame with CAT classifications per sample of concatenated
         samples for an "OVERALL" comparison.
     Output:
         1. Table with classifications comparisons (counts of similarities/
         differences between the classification of contigs on different
-        taxonomic ranks of PZN (Megablast) and CAT (Diamond).
+        taxonomic ranks of Jovian (Megablast) and CAT (Diamond).
         2. Table with classification comparisons as percentages.
         3. Stacked bar graph visualising the comparisons from the table.
         (both in absolute numbers and in percentages)
         4. Venn diagrammes that show the overlap in assigned taxa
-        between PZN and CAT at different taxonomic ranks.        
+        between Jovian and CAT at different taxonomic ranks.        
     """
-    pzn_df = concat_files(snakemake.input["pzn"])
+    jovian_df = concat_files(snakemake.input["jovian"])
     
-    merged_df = pzn_df.merge(cat_df, on='#ID', how="inner", suffixes=('_pzn', '_cat'), sort=True)
+    merged_df = jovian_df.merge(cat_df, on='#ID', how="inner", suffixes=('_jovian', '_cat'), sort=True)
     merged_df.fillna("not classified", inplace=True)
 
     total_contigs = len(merged_df)

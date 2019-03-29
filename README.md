@@ -2,9 +2,7 @@
 
 Compare classifications of different tools in a metagenomics pipeline.  
 Initial version: Compare [Contig Annotation Tool (CAT)](https://github.com/dutilh/CAT/)
-to our 
-[in-house metagenomics pipeline](https://gitl01-int-p.rivm.nl/schmitzd/PZN), 
-formerly known as "Pipeline Zonder Naam" (PZN).
+to [Jovian](https://github.com/DennisSchmitz/Jovian). (_N.B. Jovian is in a private repository at the moment._)
 
 -----
 
@@ -111,13 +109,13 @@ Figures can be found in `results/figures/` and can be viewed
 directly in a webbrowser. Tables in are in `results/tables/` and can for example
 be used in small tests. E.g. the question "which virus species were identified
 by both methods?" can be tested with 
-`cut -f 1 results/tables/OVERALL.PZN-CAT.comparison.species.tsv | grep "virus"`.
+`cut -f 1 results/tables/OVERALL.Jovian-CAT.comparison.species.tsv | grep "virus"`.
 (Such questions can be taylored to specific samples by changing the 1
 (for "classified by both") to 2 (for "clasified only by Jovian") or 3 (for
 "classified only by CAT"), "OVERALL" into the sample name, 
 taxonomic ranks by changing "species" to the desired rank,
 and to taxonomic names by changing "virus" to the desired name. E.g.
-`cut -f 3 results/tables/sample1.PZN-CAT.comparison.*.tsv | grep "bacter"` finds
+`cut -f 3 results/tables/sample1.Jovian-CAT.comparison.*.tsv | grep "bacter"` finds
 all contigs in "sample1" that were only classified by CAT and have "bacter" in
 _any_ taxonomic rank (this should catch most bacteria and bacteriophages).)
 
@@ -126,7 +124,7 @@ _any_ taxonomic rank (this should catch most bacteria and bacteriophages).)
 ## Pipeline description
 
 The current pipeline takes data from 
-[Jovian](https://gitl01-int-p.rivm.nl/schmitzd/PZN) (formerly known as "PZN").
+[Jovian](https://github.com/DennisSchmitz/Jovian).
 It starts with the assembled contigs from 
 [SPAdes](http://cab.spbu.ru/software/spades/), filtered with a minimum 
 nucleotide length (default = 500). On them ORFs are predicted with 
@@ -135,7 +133,7 @@ the NCBI BLAST nr database with
 [Diamond](http://ab.inf.uni-tuebingen.de/software/diamond/) blastp and 
 classified using CAT, after which the whole contig is assigned a taxonomic name.
 
-Simultaneously, PZN classifications per contig, and annotations of unclassified
+Simultaneously, Jovian classifications per contig, and annotations of unclassified
 contigs are collected. These are merged with the classifications from CAT, and
 finally these are compared and visualised in several different ways, per sample
 and over all included samples (summed).
@@ -177,7 +175,7 @@ in the folder `results/figures/`. Currently, the following figures are made:
   classified"), those that have different classifications ("inconsistently
   classified", e.g. one tool reports "Bacteria" and the other "Viruses" at
   the superkingdom level), those that only one of the two methods could
-  classify ("only pzn" and "only cat"), and finally contigs that neither tool
+  classify ("only jovian" and "only cat"), and finally contigs that neither tool
   was able to classify ("consistently unclassified").  
   These figures can be recognised by the `concordant_taxa.html` extension,
   and are interactive: mouse-over to view exact contig numbers, and drag if
@@ -186,8 +184,8 @@ in the folder `results/figures/`. Currently, the following figures are made:
   _This figure shows the fraction of overlap between the results of the two_
   _tools and also which tool could classify more contigs._
 
-![Classification concordance](data/example/OVERALL.PZN-CAT.concordant_taxa.png)
-
+![Classification concordance](data/example/OVERALL.Jovian-CAT.concordant_taxa.png)
+ 
  - **Taxonomic profiles**  
   For all samples, stacked bar charts represent the taxonomic profile generated
   by each classification tool, summarising taxa on the superkingdom rank. 
@@ -201,7 +199,7 @@ in the folder `results/figures/`. Currently, the following figures are made:
   _a high number of eukaryotes, while the other reports mostly bacteria:_
   _which tool is right?)_
 
-![Taxanomic profiles](data/example/OVERALL.PZN-CAT.composition_graph.png)
+![Taxanomic profiles](data/example/OVERALL.Jovian-CAT.composition_graph.png)
 
  - **Overlapping classifications (taxa)**  
   Venn diagrams visualise the overlap between the reported taxa by each tool,
@@ -214,7 +212,7 @@ in the folder `results/figures/`. Currently, the following figures are made:
   _output of the two tools. The taxa that appear in both lists are highly_
   _likely to be actually present in the original sample/patient._
 
-![Classification overlap](data/example/OVERALL.PZN-CAT.venn.png)
+![Classification overlap](data/example/OVERALL.Jovian-CAT.venn.png)
 
 ### Tables
 
@@ -226,17 +224,17 @@ analysed with command-line tools. They are saved under `results/tables/`.
   These are tab-separated text files of the taxa behind the Venn diagrammes.
   They are generated per sample and as 'overall' lists and contain 3 columns:  
   1. 'Overlap': taxa that are reported by both methods
-  2. 'PZN': taxa reported only by Jovian (formerly PZN)
+  2. 'Jovian': taxa reported only by Jovian
   3. 'CAT': taxa reported only by CAT  
   The tables' names end with `comparison.[rank].tsv` and can be used to answer
   questions such as: "which viral species were identified in sample X by both 
   methods?" usind the command: 
-  `cut -f 1 X.PZN-CAT.comparison.species.tsv | grep "vir"` or "how many genera
+  `cut -f 1 X.Jovian-CAT.comparison.species.tsv | grep "vir"` or "how many genera
   with "bacter" in their name were only reported by CAT?" with:
-  `cut -f 3 OVERALL.PZN-CAT.comparison.genus.tsv | grep "bacter" | wc -l`.  
+  `cut -f 3 OVERALL.Jovian-CAT.comparison.genus.tsv | grep "bacter" | wc -l`.  
   Change these variables to match your research question:
-  `cut -f [A] [B].PZN-CAT.comparison.[C].tsv | grep [D] [E]`, where:  
-  A = 1-3 (overlap (both), PZN (Jovian), CAT)  
+  `cut -f [A] [B].Jovian-CAT.comparison.[C].tsv | grep [D] [E]`, where:  
+  A = 1-3 (overlap (both), Jovian, CAT)  
   B = sample name, or "OVERLAP" for all samples  
   C = taxonomic rank (superkingdom, phylum, class, order, family, genus, 
   species, or "*" for all)  
@@ -246,7 +244,7 @@ analysed with command-line tools. They are saved under `results/tables/`.
   
   This table looks something like this and is _alphabetically sorted_:
   
-| **Overlap**     | **PZN**            | **CAT**        |
+| **Overlap**     | **Jovian**         | **CAT**        |
 | --------------- | ------------------ | -------------- |
 | Anelloviridae   | Campylobacteraceae | Chlamydiaceae  |
 | Bacillaceae     | Cyprinidae         | Cytophagaceae  |
