@@ -25,8 +25,8 @@ to [Jovian](https://github.com/DennisSchmitz/Jovian). (_N.B. Jovian is in a priv
 ## Requirements
 
 This project depends on:
- - [Snakemake](https://snakemake.readthedocs.io/en/stable/)  (tested with versions 5.2.2 and 5.3.0)
- - [conda](https://conda.io/en/latest/) (tested with version 4.6.4)
+ - [Snakemake](https://snakemake.readthedocs.io/en/stable/)  (tested with versions 5.2.2, 5.3.0 and 5.4.3)
+ - [conda](https://conda.io/en/latest/) (tested with version 4.6.4 and 4.6.8)
  - (optional) [DRMAA](https://pypi.org/project/drmaa/) (for use on a high-performance computing (HPC) cluster or grid computer)
 
 Please make sure you have both installed before trying to run this software. 
