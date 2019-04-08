@@ -57,10 +57,8 @@ if __name__ == "__main__":
     
     #Remove the fractions listed with each taxonomic rank:
     for column in [ "superkingdom", "phylum", "class", "order", "family", "genus", "species" ]:
-        merged_df[column].replace(to_replace='[^A-Za-z\s]+', value='', regex=True, inplace=True)
-        #And also remove the trailing whitespace in each of these cells:
-        merged_df[column] = merged_df[column].str.strip()
-    #RegEx by MaxU on StackOverflow: https://stackoverflow.com/a/44009238
+        #Remove the trailing ": [number]" from CAT's output, e.g. from "Bacteria: 1.00" to "Bacteria":
+        merged_df[column].replace(to_replace=':\s[\d].+', value='', regex=True, inplace=True)
     
     #Write the resulting dataframe to a file:
     merged_df.to_csv(snakemake.output[0], sep='\t', index=False)
