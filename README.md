@@ -89,7 +89,7 @@ _Optional: if you want to **experiment with Prodigal/Diamond parameters**:_
  (for example: `/mnt/db/CAT`)
  - `samples` is a list of sample names (i.e. file prefixes) of the samples you
  want to analyse with CAT and compare to Jovian's Megablast (e.g. if you started
- with fastq files like `SRR7892426_R1.fastq` and `SRR7892426_R1.fastq`, then
+ with fastq files like `SRR7892426_R1.fastq` and `SRR7892426_R2.fastq`, then
  the sample name is "SRR7892426")
 
 
